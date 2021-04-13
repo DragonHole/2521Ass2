@@ -3,6 +3,9 @@
 
 // Note: You MUST NOT modify this file.
 
+#ifndef FLOYD_WARSHALL_H
+#define FLOYD_WARSHALL_H
+
 #include <limits.h>
 #include <stdbool.h>
 
@@ -54,4 +57,6 @@ void showShortestPaths(ShortestPaths sps);
  * We will call this function during testing, so you must implement it.
  */
 void freeShortestPaths(ShortestPaths sps);
+
+#endif
 

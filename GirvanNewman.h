@@ -3,6 +3,9 @@
 
 // Note: You MUST NOT modify this file.
 
+#ifndef GIRVAN_NEWMAN_H
+#define GIRVAN_NEWMAN_H
+
 #include <stdbool.h>
 
 #include "Graph.h"
@@ -28,4 +31,6 @@ Dendrogram GirvanNewman(Graph g);
  * will call this function during testing, so you must implement it.
  */
 void freeDendrogram(Dendrogram d);
+
+#endif
 
