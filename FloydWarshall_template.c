@@ -98,6 +98,8 @@ void showShortestPaths(ShortestPaths sps) {
  */
 void freeShortestPaths(ShortestPaths sps) {
 	// TODO: Implement this function
+	free(sps->sps);
+	free(sps->next);
 }
 
 static int min(int x1, int x2){
