@@ -58,12 +58,12 @@ Dendrogram GirvanNewman(Graph g) {
 			l = GraphOutIncident(g, i); // vertices start from 0 to n-1
 			while(l){
 				graphCopy[i][l->v] = l->weight;
-				printf("%d -> %d = %d \n", i, l->v, l->weight);
+				//printf("%d -> %d = %d \n", i, l->v, l->weight);
 				l = l->next;
 				edgesRemaining++;
 			}
 		}
-		printf("edges remain:%d\n", edgesRemaining);
+		//printf("edges remain:%d\n", edgesRemaining);
 		//getchar();
 
 		int max = 0;	
@@ -74,16 +74,16 @@ Dendrogram GirvanNewman(Graph g) {
 					max = ev.values[i][j];
 			}
 		}
-		printf("highest betweenness: %d\n", max);
+		//printf("highest betweenness: %d\n", max);
 	
 	
-		//debug, print the memo table out
-		for(int i = 0; i < n; i++){
-			for(int j = 0; j < n; j++){
-				printf("%10d ", graphCopy[i][j]);
-			}
-			putchar('\n');
-		}
+		// //debug, print the memo table out
+		// for(int i = 0; i < n; i++){
+		// 	for(int j = 0; j < n; j++){
+		// 		printf("%10d ", graphCopy[i][j]);
+		// 	}
+		// 	putchar('\n');
+		// }
 	
 		// delete edges with highest betweenness
 		for(int i = 0; i < n; i++){
@@ -94,11 +94,11 @@ Dendrogram GirvanNewman(Graph g) {
 					GraphRemoveEdge(g, i, j);
 					
 					edgesRemaining -= 1; // minus one from the number of existing edges
-					printf("removed edge %d->%d\n", i, j);
+					//printf("removed edge %d->%d\n", i, j);
 				}	
 			}
 		}
-		putchar('\n');
+		//putchar('\n');
 	
 		// to make what remains an undirected graph, since we just want to see if weakly connected, don't care strongly connectedness.
 		for(int i = 0; i < n; i++){
@@ -108,14 +108,14 @@ Dendrogram GirvanNewman(Graph g) {
 				}	
 			}
 		}
-	
-		// debug, print the memo table out
-		for(int i = 0; i < n; i++){
-			for(int j = 0; j < n; j++){
-				printf("%10d ", graphCopy[i][j]);
-			}
-			putchar('\n');
-		}
+		
+		// // debug, print the memo table out
+		// for(int i = 0; i < n; i++){
+		// 	for(int j = 0; j < n; j++){
+		// 		printf("%10d ", graphCopy[i][j]);
+		// 	}
+		// 	putchar('\n');
+		// }
 	
 		// mark the components after removing highest between vertices
 		// record which component does each vertex belong to 
@@ -139,16 +139,16 @@ Dendrogram GirvanNewman(Graph g) {
 			depth += 1;
 		}
 	
-		// debug, show the components of each vertex
-		for(int i = 0; i < n; i++){
-			printf("%d: component %d \n", i, componentOf[i]);
-		}
+		// // debug, show the components of each vertex
+		// for(int i = 0; i < n; i++){
+		// 	printf("%d: component %d \n", i, componentOf[i]);
+		// }
 	
 		int helperCount = 0; // depth starts from 0(first parent node)
 		// add the vertices into subtrees in groups of their componentID
 		for(int i = 0; i < n; i++){
 			if(isOnlyElementOfComponent(i, n, componentOf) && addedAlready[i] == false){ // only add if the vertex is only member of component
-				printf("%d is the only component in component%d\n", i, componentOf[i]);
+				//printf("%d is the only component in component%d\n", i, componentOf[i]);
 				insertDendrogram(dg, componentOf, i, depth, helperCount);
 				addedAlready[i] = true;
 				helperCount = 0; // reset after every insert
@@ -158,9 +158,9 @@ Dendrogram GirvanNewman(Graph g) {
 		if(edgesRemaining <= 0){
 			break;
 		}
-		else{
-			printf("still going\n");
-		}
+		// else{
+		// 	printf("still going\n");
+		// }
 	
 		// recalculate after every iteration
 		//ev = edgeBetweennessCentrality(g);
@@ -200,19 +200,19 @@ static void dfsComponent(int **g, int size, int *componentOf, int componentID, i
 
 // depth:destination dendrogram insertion depth
 static Dendrogram insertDendrogram(Dendrogram dg, int *componentOf, int vertex, int depth, int helperCount){
-	printf("\ntrying insert %d to depth %d, helperCount%d\n", vertex, depth, helperCount);
+	//printf("\ntrying insert %d to depth %d, helperCount%d\n", vertex, depth, helperCount);
 	if(dg == NULL){
 		Dendrogram newNode = malloc(sizeof(DNode));
 		newNode->left = NULL;
 		newNode->right = NULL;
 		
 		if(helperCount == depth){
-			printf("created node %d\n", vertex);
+			//printf("created node %d\n", vertex);
 			newNode->vertex = vertex; // leaf
 		}
 		else if(helperCount < depth){
 			newNode->vertex = -1;	// rootstock
-			printf("created rootstock\n");
+			//printf("created rootstock\n");
 			// when node insertion requires creating a new rootstock, default add the node to left of new rootstock
 			Dendrogram dgLeft = malloc(sizeof(DNode));
 			dgLeft->right = NULL;
@@ -221,35 +221,35 @@ static Dendrogram insertDendrogram(Dendrogram dg, int *componentOf, int vertex, 
 			
 			newNode->left = dgLeft;
 		}
-		else{
-			printf("NO WAY MAN!!!\n");
-		}
+		// else{
+		// 	printf("NO WAY MAN!!!\n");
+		// }
 		
-		printf("generated node %d at depth %d, target depth:%d\n", vertex, helperCount, depth);
+		//printf("generated node %d at depth %d, target depth:%d\n", vertex, helperCount, depth);
 		return newNode;
 	}
-	printf("got here, dg verterx:%d\n", dg->vertex);
+	//printf("got here, dg verterx:%d\n", dg->vertex);
 	
 	// proceed to insert if it's a rootstock
 	if(dg->vertex == -1){
 		if(dg->left == NULL){ // if left empty
-			printf("left empty, proceed\n");
+			//printf("left empty, proceed\n");
 			dg->left = insertDendrogram(dg->left, componentOf, vertex, depth, helperCount+1);
 		}
 		else if(dg->left && dg->left->vertex == -1){ // if left is a rootstock
-			printf("left is rootstock, proceed\n");
+			//printf("left is rootstock, proceed\n");
 			dg->left = insertDendrogram(dg->left, componentOf, vertex, depth, helperCount+1);
 		}
 		else if(dg->right == NULL){ // if right empty 
-			printf("right is NULL, proceed\n");
+			//printf("right is NULL, proceed\n");
 			dg->right = insertDendrogram(dg->right, componentOf, vertex, depth, helperCount+1);
 		}
 		else if(dg->right && dg->right->vertex == -1){ // if right is a rootstock
-			printf("right is rootstock, proceed\n");
+			//printf("right is rootstock, proceed\n");
 			dg->right = insertDendrogram(dg->right, componentOf, vertex, depth, helperCount+1);
 		}
 		else{
-			printf("THIS SHOULDN't HAPPEN!!!\n");
+			//printf("THIS SHOULDN't HAPPEN!!!\n");
 		}
 	}
 	else{
