@@ -10,7 +10,7 @@
 #include "Graph.h"
 
 static void dfsComponent(int **g, int size, int *componentOf, int componentID, int vertex);
-static Dendrogram insertDendrogram(Dendrogram dg, int *componentOf, int vertex, int depth, int helpCount);
+static Dendrogram insertDendrogram(Dendrogram dg, int vertex, int depth, int helpCount);
 static bool isOnlyElementOfComponent(int vertex, int size, int *componentOf);
 
 /**
@@ -21,14 +21,13 @@ static bool isOnlyElementOfComponent(int vertex, int size, int *componentOf);
  */
 Dendrogram GirvanNewman(Graph g) {
 	int n = GraphNumVertices(g);
-	EdgeValues ev = edgeBetweennessCentrality(g); // TODO remove?
+	EdgeValues ev;
 	int edgesRemaining = 0;
 	
 	Dendrogram dg = malloc(sizeof(DNode));
-	//Dendrogram current_dg_node = dg;
-	 dg->vertex = -1; // -1 for non-leave node
-	 dg->left = NULL;
-	 dg->right =NULL;
+	dg->vertex = -1; // -1 for non-leave node
+	dg->left = NULL;
+	dg->right =NULL;
 	
 	int original_num_components = 1;
 	int depth = 0; // current depth, start from 0, +1 at each iteration
@@ -49,6 +48,7 @@ Dendrogram GirvanNewman(Graph g) {
 	// repeat until no edges remain
 	// start loop below
 	while(true){
+		// recalculate the edge betweenness everytime
 		ev = edgeBetweennessCentrality(g);
 	
 		// get the graph edges every time
@@ -91,7 +91,7 @@ Dendrogram GirvanNewman(Graph g) {
 				if(ev.values[i][j] == max){
 					graphCopy[i][j] = -1;
 					ev.values[i][j] = -1;
-					GraphRemoveEdge(g, i, j);
+					GraphRemoveEdge(g, i, j);	// do it for edgeBetweennessCentrality(g), it needs to use updated g
 					
 					edgesRemaining -= 1; // minus one from the number of existing edges
 					//printf("removed edge %d->%d\n", i, j);
@@ -133,7 +133,7 @@ Dendrogram GirvanNewman(Graph g) {
 			}
 		}
 	
-		// new component has been formed
+		// if new component has been formed, increment target depth level by one, want to go deeper.
 		if(componentID > original_num_components){
 			original_num_components = componentID;
 			depth += 1;
@@ -149,33 +149,29 @@ Dendrogram GirvanNewman(Graph g) {
 		for(int i = 0; i < n; i++){
 			if(isOnlyElementOfComponent(i, n, componentOf) && addedAlready[i] == false){ // only add if the vertex is only member of component
 				//printf("%d is the only component in component%d\n", i, componentOf[i]);
-				insertDendrogram(dg, componentOf, i, depth, helperCount);
+				insertDendrogram(dg, i, depth, helperCount);
 				addedAlready[i] = true;
 				helperCount = 0; // reset after every insert
 			}
 		}
-	
+		
+		free(componentOf);
+		
+		// condition to exit the loop
 		if(edgesRemaining <= 0){
 			break;
 		}
-		// else{
-		// 	printf("still going\n");
-		// }
-	
-		// recalculate after every iteration
-		//ev = edgeBetweennessCentrality(g);
 	}
 	// end loop here
 	
 	
-	// int helperC = 0;
-	// dg = insertDendrogram(dg, componentOf, 5, 1, helperC);
-	// helperC = 0;
-	// dg = insertDendrogram(dg, componentOf, 3, 2, helperC);
-	// helperC = 0;
-	// dg = insertDendrogram(dg, componentOf, 9, 3, helperC);
-	// helperC = 0;
-	// dg = insertDendrogram(dg, componentOf, 6, 3, helperC);
+	// cleanup 
+	for(int i = 0; i < n; i++){
+		free(graphCopy[i]);
+	}
+	free(graphCopy);
+
+	free(addedAlready);
 
 	return dg;
 }
@@ -185,7 +181,13 @@ Dendrogram GirvanNewman(Graph g) {
  * will call this function during testing, so you must implement it.
  */
 void freeDendrogram(Dendrogram d) {
-	// TODO: Implement this function
+	if(d == NULL)
+		return;
+	
+	freeDendrogram(d->left);
+	freeDendrogram(d->right);
+	
+	free(d);
 }
 
 static void dfsComponent(int **g, int size, int *componentOf, int componentID, int vertex){
@@ -199,7 +201,7 @@ static void dfsComponent(int **g, int size, int *componentOf, int componentID, i
 }
 
 // depth:destination dendrogram insertion depth
-static Dendrogram insertDendrogram(Dendrogram dg, int *componentOf, int vertex, int depth, int helperCount){
+static Dendrogram insertDendrogram(Dendrogram dg, int vertex, int depth, int helperCount){
 	//printf("\ntrying insert %d to depth %d, helperCount%d\n", vertex, depth, helperCount);
 	if(dg == NULL){
 		Dendrogram newNode = malloc(sizeof(DNode));
@@ -213,7 +215,7 @@ static Dendrogram insertDendrogram(Dendrogram dg, int *componentOf, int vertex, 
 		else if(helperCount < depth){
 			newNode->vertex = -1;	// rootstock
 			//printf("created rootstock\n");
-			// when node insertion requires creating a new rootstock, default add the node to left of new rootstock
+			// when node insertion requires creating a new rootstock, default add the node to left of new rootstock, just a random choice, can add to right as well.
 			Dendrogram dgLeft = malloc(sizeof(DNode));
 			dgLeft->right = NULL;
 			dgLeft->left = NULL;
@@ -234,22 +236,22 @@ static Dendrogram insertDendrogram(Dendrogram dg, int *componentOf, int vertex, 
 	if(dg->vertex == -1){
 		if(dg->left == NULL){ // if left empty
 			//printf("left empty, proceed\n");
-			dg->left = insertDendrogram(dg->left, componentOf, vertex, depth, helperCount+1);
+			dg->left = insertDendrogram(dg->left, vertex, depth, helperCount+1);
 		}
 		else if(dg->left && dg->left->vertex == -1){ // if left is a rootstock
 			//printf("left is rootstock, proceed\n");
-			dg->left = insertDendrogram(dg->left, componentOf, vertex, depth, helperCount+1);
+			dg->left = insertDendrogram(dg->left, vertex, depth, helperCount+1);
 		}
 		else if(dg->right == NULL){ // if right empty 
 			//printf("right is NULL, proceed\n");
-			dg->right = insertDendrogram(dg->right, componentOf, vertex, depth, helperCount+1);
+			dg->right = insertDendrogram(dg->right, vertex, depth, helperCount+1);
 		}
 		else if(dg->right && dg->right->vertex == -1){ // if right is a rootstock
 			//printf("right is rootstock, proceed\n");
-			dg->right = insertDendrogram(dg->right, componentOf, vertex, depth, helperCount+1);
+			dg->right = insertDendrogram(dg->right, vertex, depth, helperCount+1);
 		}
 		else{
-			//printf("THIS SHOULDN't HAPPEN!!!\n");
+			printf("THIS SHOULDN't HAPPEN!!!\n");
 		}
 	}
 	else{
@@ -257,7 +259,6 @@ static Dendrogram insertDendrogram(Dendrogram dg, int *componentOf, int vertex, 
 	}
 	
 	return dg;
-	// todo: consider componentOf and depth, and added already?
 }
 
 static bool isOnlyElementOfComponent(int vertex, int size, int *componentOf){

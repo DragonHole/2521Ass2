@@ -23,8 +23,6 @@ ShortestPaths FloydWarshall(Graph g) {
 	int n = GraphNumVertices(g);
 	sps.numNodes = n;
 
-	//printf("papa %d\n", n);
-
 	// my 2D memo table 
 	//sps.next = calloc(n*n, sizeof(int));
 	//sps.next = malloc(sizeof(int[n][n]));
@@ -71,8 +69,7 @@ ShortestPaths FloydWarshall(Graph g) {
 	// 	}
 	// 	putchar('\n');
 	// }
-
-
+	
 	// start procgessing
 	for(int k = 0; k < n; k++){
 		for(int i = 0; i < n; i++){
@@ -113,6 +110,10 @@ void showShortestPaths(ShortestPaths sps) {
  * We will call this function during testing, so you must implement it.
  */
 void freeShortestPaths(ShortestPaths sps) {
-	// TODO: Implement this function
+	for(int i = 0; i < sps.numNodes; i++)
+    	free(sps.next[i]);
+	
+	for(int i = 0; i < sps.numNodes; i++)
+    	free(sps.dist[i]);
 }
 

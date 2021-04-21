@@ -22,7 +22,7 @@ EdgeValues edgeBetweennessCentrality(Graph g) {
 
 	e.values = malloc(n * sizeof(double *));
 	for(int i = 0; i < n; i++){
-    	e.values[i] = calloc(n, sizeof(double));
+    	e.values[i] = malloc(n * sizeof(double));
     	for(int j = 0; j < n; j++)
     		e.values[i][j] = -1;	// default all to -1
 	}
@@ -83,7 +83,10 @@ void showEdgeValues(EdgeValues evs) {
  * will call this function during testing, so you must implement it.
  */
 void freeEdgeValues(EdgeValues evs) {
-	// TODO: Implement this function
+	for(int i = 0; i < evs.numNodes; i++){
+		free(evs.values[i]);
+	}
+	free(evs.values);
 }
 
 
