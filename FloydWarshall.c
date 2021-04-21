@@ -18,7 +18,6 @@
  * - matrix of intermediates (see description above)
  */
 ShortestPaths FloydWarshall(Graph g) {
-	// TODO: Implement this function
 	ShortestPaths sps = {0};
 
 	int n = GraphNumVertices(g);
@@ -65,7 +64,7 @@ ShortestPaths FloydWarshall(Graph g) {
 		sps.next[i][i] = -1; //  = i? myself to myself.. already set in init above
 	}
 
-	// debug, print the memo table out
+	// //debug, print the memo table out
 	// for(int k = 0; k < n; k++){
 	// 	for(int i = 0; i < n; i++){
 	// 		printf("%10d ", sps.dist[k][i]);
