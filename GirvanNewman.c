@@ -134,9 +134,11 @@ Dendrogram GirvanNewman(Graph g) {
 		}
 	
 		// if new component has been formed, increment target depth level by one, want to go deeper.
+		// also assume only one new component is formed at each iteration
+		// actually 'depth=componentID-original_sum_components' sort of works if >1 components formed
 		if(componentID > original_num_components){
-			original_num_components = componentID;
 			depth += 1;
+			original_num_components = componentID;
 		}
 	
 		// // debug, show the components of each vertex
